@@ -1,5 +1,6 @@
 var UserDAO = require("../data/user-dao").UserDAO;
 var AllocationsDAO = require("../data/allocations-dao").AllocationsDAO;
+var TCellHooks = require('tcell-hooks').v1;
 
 /* The SessionHandler must be constructed with a connected db */
 function SessionHandler(db) {
@@ -61,6 +62,11 @@ function SessionHandler(db) {
             var invalidPasswordErrorMessage = "Invalid password";
             if (err) {
                 if (err.noSuchUser) {
+                     TCellHooks.sendExpressLoginEventFailure(
+                       req,
+                       userName,
+                       req.sessionID,
+                       false);
                     console.log('Error: attempt to login with invalid user: ', userName);
 
                     // Fix for A1 - 3 Log Injection - encode/sanitize input for CRLF Injection
@@ -83,6 +89,11 @@ function SessionHandler(db) {
                         // loginError: errorMessage
                     });
                 } else if (err.invalidPassword) {
+                     TCellHooks.sendExpressLoginEventFailure(
+                       req,
+                       userName,
+                       req.sessionID,
+                       true);
                     return res.render("login", {
                         userName: userName,
                         password: "",
@@ -229,6 +240,10 @@ function SessionHandler(db) {
                     });
                     */
                     req.session.regenerate(function() {
+                        TCellHooks.sendExpressLoginEventSuccess(
+                           req,
+                           userName,
+                           req.sessionID);
                         req.session.userId = user._id;
                         // Set userId property. Required for left nav menu links
                         user.userId = user._id;

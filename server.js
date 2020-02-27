@@ -1,4 +1,5 @@
 "use strict";
+var tcellAgent = require('tcell-agent');
 
 var express = require("express");
 var favicon = require("serve-favicon");
